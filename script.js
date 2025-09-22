@@ -29,12 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameHistory = [];
     let isMusicInitialized = false;
 
-    // --- Music Tracks ---
+    // --- Royalty-Free Music Tracks from Pixabay ---
     const musicTracks = [
-        'https://cdn.pixabay.com/audio/2022/10/18/audio_84323425f3.mp3',
-        'https://cdn.pixabay.com/audio/2022/08/04/audio_2dde66b93b.mp3',
-        'https://cdn.pixabay.com/audio/2022/11/17/audio_811986985b.mp3',
-        'https://cdn.pixabay.com/audio/2023/05/27/audio_2922a61a6b.mp3'
+        'https://cdn.pixabay.com/audio/2022/10/18/audio_84323425f3.mp3', // Corporate
+        'https://cdn.pixabay.com/audio/2022/08/04/audio_2dde66b93b.mp3', // Puzzle
+        'https://cdn.pixabay.com/audio/2022/11/17/audio_811986985b.mp3', // Tech
+        'https://cdn.pixabay.com/audio/2023/05/27/audio_2922a61a6b.mp3', // Funky
+        'https://cdn.pixabay.com/audio/2022/01/21/audio_c3a9f02880.mp3'  // Lofi
     ];
 
     // --- Admin Panel Word Starters ---
@@ -51,10 +52,21 @@ document.addEventListener('DOMContentLoaded', () => {
     p1.inputEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleApply(1); });
     p2.inputEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleApply(2); });
 
-    // --- Music Functions (ROBUST SOLUTION) ---
+    // --- Music Functions (Manual Start) ---
     function toggleMusic() {
-        if (!isMusicInitialized) return;
+        // First click initializes and plays music
+        if (!isMusicInitialized) {
+            const randomTrack = musicTracks[Math.floor(Math.random() * musicTracks.length)];
+            bgMusic.src = randomTrack;
+            bgMusic.loop = true;
+            bgMusic.volume = 0.3;
+            bgMusic.play();
+            isMusicInitialized = true;
+            muteBtn.textContent = '🔊';
+            return;
+        }
 
+        // Subsequent clicks toggle pause/play
         if (bgMusic.paused) {
             bgMusic.play();
             muteBtn.textContent = '🔊';
@@ -66,29 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Game Logic Functions ---
     function initializeGame() {
-        // --- KEY FIX FOR MUSIC: Initialize and play inside the user's click event ---
-        if (!isMusicInitialized) {
-            const randomTrack = musicTracks[Math.floor(Math.random() * musicTracks.length)];
-            bgMusic.src = randomTrack;
-            bgMusic.loop = true;
-            bgMusic.volume = 0.3;
-            const playPromise = bgMusic.play();
-
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    muteBtn.textContent = '🔊';
-                    isMusicInitialized = true;
-                }).catch(error => {
-                    console.error("Music autoplay failed:", error);
-                    muteBtn.textContent = '🔇';
-                    isMusicInitialized = true;
-                });
-            }
-        } else if (bgMusic.paused) {
-            bgMusic.play();
-            muteBtn.textContent = '🔊';
-        }
-        
         const p1Name = player1NameInput.value.trim() || 'Player 1';
         const p2Name = player2NameInput.value.trim() || 'Player 2';
         gameState = {
@@ -112,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
         startScreen.classList.add('active');
         player1NameInput.value = '';
         player2NameInput.value = '';
-        // Music continues to play for the next round unless the page is refreshed.
     }
     
     function endGame(forced = false) {
